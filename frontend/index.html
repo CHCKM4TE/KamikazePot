@@ -1,6 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KamikazePot</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  </head>
   <body>
-    <h1>KamikazePot frontend placeholder</h1>
+    <header>
+      <div class="brand">💥 KamikazePot</div>
+      <button id="connectButton" class="primary">Connect Wallet</button>
+      <button id="themeToggle" class="ghost" aria-label="Toggle theme">🌙</button>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Round Status</h2>
+        <div class="stat-grid">
+          <div class="stat">
+            <p class="label">Current Pot</p>
+            <p id="potValue" class="value">0.00 ETH</p>
+          </div>
+          <div class="stat">
+            <p class="label">Your Credits</p>
+            <p id="creditsValue" class="value">0</p>
+          </div>
+          <div class="stat">
+            <p class="label">Last Player</p>
+            <p id="lastPlayer" class="value">—</p>
+          </div>
+          <div class="stat">
+            <p class="label">Time Left</p>
+            <p id="timeLeft" class="value">00:00</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel actions">
+        <div class="action">
+          <label for="buyAmount">Buy Credits (ETH to spend)</label>
+          <div class="inline">
+            <input id="buyAmount" type="number" min="0" step="0.001" placeholder="0.01" />
+            <button id="buyButton" class="secondary">Buy Credits</button>
+          </div>
+          <p class="hint">Credits cost 0.001 ETH each. Send whole multiples to maximize credits.</p>
+        </div>
+
+        <div class="action">
+          <label>Spend 1 credit to play and become the last player.</label>
+          <button id="playButton" class="primary wide">Play</button>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Fully trustless. No custodial actions. Every transaction is signed directly in your wallet.</p>
+    </footer>
+
+    <script src="app.js"></script>
   </body>
 </html>
