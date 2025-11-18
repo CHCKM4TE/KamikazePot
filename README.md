@@ -39,7 +39,7 @@ cd frontend
 python3 -m http.server 8080
 ```
 
-Then open `http://localhost:8080` and connect your wallet (MetaMask).
+Then open `http://localhost:8080` and connect your wallet. Any EVM-injected wallet that supports the `window.ethereum` provider (MetaMask, Coinbase Wallet extension, Brave Wallet, Frame, etc.) will work.
 
 ## Deploying to GitHub
 
@@ -56,6 +56,19 @@ Then open `http://localhost:8080` and connect your wallet (MetaMask).
 2. Set **Framework preset** to **None** (static).
 3. Set the **Build command** to `none` (leave empty) and **Build output directory** to `frontend`.
 4. Deploy. Pages will host the static files; all interactions remain client → wallet → contract.
+
+## Theme & UI
+
+- The site defaults to a light palette and includes a dark mode toggle (🌙/☀️) in the header. The preference is stored locally in the browser.
+
+## Testing Without Real Funds
+
+- Use any public testnet (e.g., Sepolia or Holesky). Deploy the contract there, update `contractAddress` in `frontend/app.js`, and fund your wallet with test ETH from a faucet.
+- For full local control, spin up a local Hardhat/Anvil node, deploy the contract to it, and point MetaMask (or other wallets) at the local RPC. All transactions remain signed in-wallet; no backend is involved.
+
+## Wallet Support
+
+- The frontend talks directly to any injected EIP-1193/EIP-1102 provider exposed at `window.ethereum`. This covers MetaMask, Coinbase Wallet extension, Brave Wallet, Frame, and similar EVM wallets. Phantom currently focuses on Solana; use its EVM beta only if it injects `window.ethereum` on your setup.
 
 ## Gameplay Notes
 

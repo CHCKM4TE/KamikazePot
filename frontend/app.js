@@ -26,11 +26,13 @@ const buyButton = document.getElementById("buyButton");
 const playButton = document.getElementById("playButton");
 const buyAmountInput = document.getElementById("buyAmount");
 
-function requireMetaMask() {
-  if (!window.ethereum) {
-    alert("MetaMask is required to play.");
-    throw new Error("MetaMask not found");
+function getInjectedProvider() {
+  const { ethereum } = window;
+  if (!ethereum) return undefined;
+  if (ethereum.providers?.length) {
+    return ethereum.providers.find((p) => p.isMetaMask) || ethereum.providers[0];
   }
+  return ethereum;
 }
 
 function formatAddress(addr) {
@@ -39,16 +41,21 @@ function formatAddress(addr) {
 }
 
 async function initProvider() {
-  requireMetaMask();
-  provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  const injected = getInjectedProvider();
+  if (!injected) {
+    alert("Please install an EVM wallet (MetaMask, Coinbase Wallet, Brave, etc.)");
+    throw new Error("No EVM wallet detected");
+  }
+  provider = new ethers.providers.Web3Provider(injected, "any");
   contract = new ethers.Contract(contractAddress, contractAbi, provider);
   setupWalletListeners();
   startPolling();
 }
 
 async function connectWallet() {
-  requireMetaMask();
-  const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+  const injected = getInjectedProvider();
+  if (!injected) return initProvider();
+  const accounts = await injected.request({ method: "eth_requestAccounts" });
   currentAccount = ethers.utils.getAddress(accounts[0]);
   signer = provider.getSigner();
   contract = contract.connect(signer);
@@ -59,9 +66,10 @@ async function connectWallet() {
 }
 
 function setupWalletListeners() {
-  if (!window.ethereum) return;
+  const injected = getInjectedProvider();
+  if (!injected) return;
 
-  window.ethereum.on("accountsChanged", (accounts) => {
+  injected.on("accountsChanged", (accounts) => {
     if (accounts.length === 0) {
       currentAccount = undefined;
       connectButton.textContent = "Connect Wallet";
@@ -77,7 +85,7 @@ function setupWalletListeners() {
     refreshState();
   });
 
-  window.ethereum.on("chainChanged", () => {
+  injected.on("chainChanged", () => {
     window.location.reload();
   });
 }
@@ -160,8 +168,29 @@ function startPolling() {
   setInterval(refreshState, 1000);
 }
 
+const themeToggle = document.getElementById("themeToggle");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+function applyTheme(theme) {
+  document.body.setAttribute("data-theme", theme);
+  themeToggle.textContent = theme === "dark" ? "☀️" : "🌙";
+  localStorage.setItem("kamikazepot-theme", theme);
+}
+
+function initTheme() {
+  const stored = localStorage.getItem("kamikazepot-theme");
+  const theme = stored || (prefersDark.matches ? "dark" : "light");
+  applyTheme(theme);
+}
+
+themeToggle.addEventListener("click", () => {
+  const next = document.body.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  applyTheme(next);
+});
+
 connectButton.addEventListener("click", connectWallet);
 buyButton.addEventListener("click", buyCredits);
 playButton.addEventListener("click", playGame);
 
+initTheme();
 initProvider().catch((err) => console.error(err));
