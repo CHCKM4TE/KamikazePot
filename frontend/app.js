@@ -85,9 +85,31 @@ function setupWalletListeners() {
     refreshState();
   });
 
-  injected.on("chainChanged", () => {
-    window.location.reload();
-  });
+  injected.on("chainChanged", handleChainChanged);
+}
+
+async function handleChainChanged() {
+  const injected = getInjectedProvider();
+  if (!injected) return;
+
+  try {
+    provider = new ethers.providers.Web3Provider(injected, "any");
+    contract = new ethers.Contract(contractAddress, contractAbi, provider);
+
+    if (currentAccount) {
+      signer = provider.getSigner();
+      contract = contract.connect(signer);
+      connectButton.textContent = formatAddress(currentAccount);
+    } else {
+      connectButton.textContent = "Connect Wallet";
+      playButton.disabled = true;
+      buyButton.disabled = true;
+    }
+
+    await refreshState();
+  } catch (err) {
+    console.error("Failed to handle chain change", err);
+  }
 }
 
 async function refreshState() {
